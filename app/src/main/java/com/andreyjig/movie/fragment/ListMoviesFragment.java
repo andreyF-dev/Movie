@@ -1,80 +1,81 @@
 package com.andreyjig.movie.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.andreyjig.movie.BuildConfig;
 import com.andreyjig.movie.R;
+import com.andreyjig.movie.adapter.FilmsAdapter;
+import com.andreyjig.movie.adapter.GenresAdapter;
+import com.andreyjig.movie.model.Movie;
+import com.andreyjig.movie.utilities.MovieUtils;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ListMoviesFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ListMoviesFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ListMoviesFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+import java.util.ArrayList;
 
+public class ListMoviesFragment extends Fragment
+        implements GenresAdapter.GenresAdapterCallback, FilmsAdapter.FilmsAdapterCallback {
+
+    private static final String TAG = "ListMoviesFragment";
     private OnFragmentInteractionListener mListener;
 
+    private RecyclerView mRecyclerViewGenres;
+    private RecyclerView mRecyclerViewFilms;
+
+    private GenresAdapter mGenresAdapter;
+    private FilmsAdapter mFilmsAdapter;
+
+    private ArrayList<Movie> mMovies;
+
     public ListMoviesFragment() {
-        // Required empty public constructor
+
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ListMoviesFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ListMoviesFragment newInstance(String param1, String param2) {
-        ListMoviesFragment fragment = new ListMoviesFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+
+    public static ListMoviesFragment newInstance() {
+        return new ListMoviesFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        setRetainInstance(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_list_movies, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_list_movies, container, false);
+        mRecyclerViewGenres = view.findViewById(R.id.fragment_list_movies_recyclerview_genres);
+        mRecyclerViewFilms = view.findViewById(R.id.fragment_list_movies_recyclerview_films);
+        mRecyclerViewGenres.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        mRecyclerViewFilms.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        mMovies = new ArrayList<>();
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        getMovies();
+        return view;
     }
 
     @Override
@@ -94,18 +95,60 @@ public class ListMoviesFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    @Override
+    public void setGenre(String genre) {
+        mFilmsAdapter.getFilterMovies(genre);
+    }
+
+    @Override
+    public void getMovieInf(Movie movie) {
+        mListener.onSelectMovie(movie);
+    }
+
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+
+        void onSelectMovie(Movie movie);
+
+    }
+
+    private void getMovies(){
+        if (getContext() != null) {
+            RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+            String url = Movie.URL;
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
+                    url, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Gson gson = new GsonBuilder().create();
+                        JSONArray array = response.getJSONArray(Movie.FILMS);
+
+                        mMovies = gson.fromJson(array.toString(),
+                                new TypeToken<ArrayList<Movie>>() {
+                                }.getType());
+
+                    } catch (JSONException e) {
+                        if (BuildConfig.DEBUG) {
+                            Log.d(TAG, "JSONException " + e);
+                        }
+                    }
+
+                    ArrayList<String> genres = MovieUtils.getGenres(mMovies);
+                    mGenresAdapter = new GenresAdapter(getContext(), genres, ListMoviesFragment.this);
+                    mRecyclerViewGenres.setAdapter(mGenresAdapter);
+                    mFilmsAdapter = new FilmsAdapter(getContext(), mMovies, ListMoviesFragment.this);
+                    mRecyclerViewFilms.setAdapter(mFilmsAdapter);
+                }
+
+
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d(TAG, "Error " + error);
+                    error.printStackTrace();
+                }
+            });
+            requestQueue.add(request);
+        }
     }
 }
