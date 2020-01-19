@@ -5,7 +5,11 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -42,13 +46,28 @@ public class MovieInfFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(ARG_MOVIE);
+        } else {
+            mMovie = new Movie();
         }
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home){
+            getActivity().getSupportFragmentManager().popBackStack();
+            getActivity().setTitle(R.string.app_name);
+        }
+        return true;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movie_inf, container, false);
+
+        getActivity().setTitle(mMovie.getLocalized_name());
 
         mTextViewName = view.findViewById(R.id.fragment_movie_inf_name_text);
         mTextViewYear = view.findViewById(R.id.fragment_movie_inf_year_text);
