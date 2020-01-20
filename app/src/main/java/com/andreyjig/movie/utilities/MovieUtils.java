@@ -1,9 +1,7 @@
 package com.andreyjig.movie.utilities;
 
 import com.andreyjig.movie.model.Movie;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MovieUtils {
 
@@ -12,9 +10,9 @@ public class MovieUtils {
 
         for (Movie movie: movies){
             String[] genres = movie.getGenres();
-            for (int index = 0; index < genres.length; index++){
-                if (!result.contains(genres[index])){
-                    result.add(genres[index]);
+            for (String genre : genres) {
+                if (!result.contains(genre)) {
+                    result.add(genre);
                 }
             }
         }

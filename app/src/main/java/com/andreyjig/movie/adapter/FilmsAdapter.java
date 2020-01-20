@@ -6,22 +6,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.andreyjig.movie.R;
 import com.andreyjig.movie.model.Movie;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
 public class FilmsAdapter extends RecyclerView.Adapter<FilmsAdapter.MovieInfHolder> {
 
-    Context mContext;
-    ArrayList<Movie> mMovies;
-    ArrayList<Integer> mFilterMoviesIndex;
-    FilmsAdapterCallback mAdapterCallback;
+    private Context mContext;
+    private ArrayList<Movie> mMovies;
+    private ArrayList<Integer> mFilterMoviesIndex;
+    private FilmsAdapterCallback mAdapterCallback;
 
 
     public FilmsAdapter(Context context, ArrayList<Movie> movies, FilmsAdapterCallback adapterCallback) {
@@ -44,10 +42,11 @@ public class FilmsAdapter extends RecyclerView.Adapter<FilmsAdapter.MovieInfHold
         Movie movie = mMovies.get(mFilterMoviesIndex.get(position));
         holder.mTextView.setText(movie.getLocalized_name());
 
-        Picasso.with(mContext)
+        Glide.with(holder.mImageView.getContext())
                 .load(movie.getImage_url())
                 .placeholder(R.drawable.ic_camera_roll_100dp)
-                .fit().centerCrop().into(holder.mImageView);
+                .centerCrop()
+                .into(holder.mImageView);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class FilmsAdapter extends RecyclerView.Adapter<FilmsAdapter.MovieInfHold
         ImageView mImageView;
         TextView mTextView;
 
-        public MovieInfHolder(@NonNull View itemView) {
+        MovieInfHolder(@NonNull View itemView) {
             super(itemView);
             mImageView = itemView.findViewById(R.id.item_movie_image);
             mTextView = itemView.findViewById(R.id.item_movie_text);

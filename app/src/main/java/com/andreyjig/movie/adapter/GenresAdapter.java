@@ -3,14 +3,10 @@ package com.andreyjig.movie.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.andreyjig.movie.R;
@@ -18,8 +14,6 @@ import com.andreyjig.movie.R;
 import java.util.ArrayList;
 
 public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHolder>{
-
-    private static final String TAG = "GenresAdapter";
 
     private Context mContext;
     private ArrayList<String> mGenres;
@@ -65,7 +59,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
         return mGenres.size();
     }
 
-    public void updateAdapter (int position){
+    private void updateAdapter(int position){
         if (selectedGenres == position) {
             selectedGenres = -1;
             mAdapterCallback.setGenre("");

@@ -3,4 +3,8 @@
     <string name="movie">Фильм</string>
     <string name="genres">Жанры</string>
     <string name="films">Фильмы</string>
+    <string name="error_download">Ошибка загрузки</string>
+    <string name="download_now">Загрузить снова</string>
+    <string name="year">Год: %s</string>
+    <string name="rating">Рейтинг: %s</string>
 </resources>
