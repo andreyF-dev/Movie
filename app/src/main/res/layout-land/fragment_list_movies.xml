@@ -3,8 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="8dp"
-    android:orientation="vertical"
-    android:weightSum="100">
+    android:orientation="horizontal"
+    android:weightSum="100"
+    android:baselineAligned="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,8 +25,8 @@
             android:id="@+id/fragment_list_movies_progress_bar_genres"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:layout_gravity="center" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
@@ -52,9 +53,9 @@
         <ProgressBar
             android:id="@+id/fragment_list_movies_progress_bar_films"
             android:layout_gravity="center"
-            android:visibility="gone"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"

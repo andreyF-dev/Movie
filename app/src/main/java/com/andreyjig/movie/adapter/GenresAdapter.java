@@ -7,13 +7,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.andreyjig.movie.R;
 
 import java.util.ArrayList;
 
-public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHolder>{
+public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHolder> {
 
     private Context mContext;
     private ArrayList<String> mGenres;
@@ -31,7 +33,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
     @Override
     public GenresHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).
-                inflate(R.layout.item_genres, parent,false);
+                inflate(R.layout.item_genres, parent, false);
         return new GenresHolder(view);
     }
 
@@ -39,14 +41,14 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
     public void onBindViewHolder(@NonNull GenresHolder holder, int position) {
         String genre = mGenres.get(position);
         holder.mTextView.setText(genre);
-        if (position == selectedGenres){
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+        if (position == selectedGenres) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 holder.mTextView.setBackgroundColor(Color.GRAY);
             } else {
                 holder.mTextView.setBackgroundColor(mContext.getColor(R.color.background_text_genres_selected));
             }
         } else {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 holder.mTextView.setBackgroundColor(Color.WHITE);
             } else {
                 holder.mTextView.setBackgroundColor(mContext.getColor(R.color.background_text_genres));
@@ -59,7 +61,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
         return mGenres.size();
     }
 
-    private void updateAdapter(int position){
+    private void updateAdapter(int position) {
         if (selectedGenres == position) {
             selectedGenres = -1;
             mAdapterCallback.setGenre("");
@@ -70,7 +72,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
         notifyDataSetChanged();
     }
 
-    class GenresHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class GenresHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView mTextView;
 
@@ -88,6 +90,6 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
 
 
     public interface GenresAdapterCallback {
-        void setGenre (String genre);
+        void setGenre(String genre);
     }
 }

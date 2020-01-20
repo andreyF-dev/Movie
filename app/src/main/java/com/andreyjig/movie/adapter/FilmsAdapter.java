@@ -6,10 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.andreyjig.movie.R;
 import com.andreyjig.movie.model.Movie;
+import com.andreyjig.movie.utilities.MovieUtils;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -54,7 +57,7 @@ public class FilmsAdapter extends RecyclerView.Adapter<FilmsAdapter.MovieInfHold
         return mFilterMoviesIndex.size();
     }
 
-    class MovieInfHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class MovieInfHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView mImageView;
         TextView mTextView;
@@ -72,25 +75,12 @@ public class FilmsAdapter extends RecyclerView.Adapter<FilmsAdapter.MovieInfHold
         }
     }
 
-    public void getFilterMovies (String genre){
-        mFilterMoviesIndex = new ArrayList<>();
-        for (int index = 0; index < mMovies.size(); index++){
-            if (genre.isEmpty()){
-                mFilterMoviesIndex.add(index);
-            } else {
-                Movie movie = mMovies.get(index);
-                for (int currentGenre = 0; currentGenre < movie.getGenres().length; currentGenre++){
-                    if (movie.getGenres()[currentGenre].equals(genre)){
-                        mFilterMoviesIndex.add(index);
-                        break;
-                    }
-                }
-            }
-        }
+    public void getFilterMovies(String genre) {
+        mFilterMoviesIndex = MovieUtils.getFilterIndex(genre, mMovies);
         notifyDataSetChanged();
     }
 
     public interface FilmsAdapterCallback {
-        void getMovieInf (Movie movie);
+        void getMovieInf(Movie movie);
     }
 }

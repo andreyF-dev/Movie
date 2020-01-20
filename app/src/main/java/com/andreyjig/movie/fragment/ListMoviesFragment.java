@@ -1,16 +1,19 @@
 package com.andreyjig.movie.fragment;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
 import com.andreyjig.movie.BuildConfig;
 import com.andreyjig.movie.R;
 import com.andreyjig.movie.adapter.FilmsAdapter;
@@ -27,10 +30,15 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ListMoviesFragment extends Fragment
         implements GenresAdapter.GenresAdapterCallback, FilmsAdapter.FilmsAdapterCallback {
@@ -72,7 +80,12 @@ public class ListMoviesFragment extends Fragment
         mRecyclerViewFilms = view.findViewById(R.id.fragment_list_movies_recyclerview_films);
         mProgressBarGenres = view.findViewById(R.id.fragment_list_movies_progress_bar_genres);
         mProgressBarFilms = view.findViewById(R.id.fragment_list_movies_progress_bar_films);
-        mRecyclerViewGenres.setLayoutManager(new GridLayoutManager(getContext(), 3));
+
+        mProgressBarGenres.setVisibility(View.VISIBLE);
+        mProgressBarFilms.setVisibility(View.VISIBLE);
+        mRecyclerViewGenres.setVisibility(View.GONE);
+        mRecyclerViewFilms.setVisibility(View.GONE);
+
         mRecyclerViewFilms.setLayoutManager(new GridLayoutManager(getContext(), 2));
         mMovies = new ArrayList<>();
         mSnackBarOnClickListener = new View.OnClickListener() {
@@ -81,8 +94,13 @@ public class ListMoviesFragment extends Fragment
                 getMovies();
             }
         };
-
         getMovies();
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mRecyclerViewGenres.setLayoutManager(new GridLayoutManager(getContext(), 1));
+        } else {
+            mRecyclerViewGenres.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        }
         return view;
     }
 
@@ -110,8 +128,6 @@ public class ListMoviesFragment extends Fragment
 
     @Override
     public void getMovieInf(Movie movie) {
-        mRecyclerViewGenres.setNestedScrollingEnabled(false);
-        mRecyclerViewFilms.setNestedScrollingEnabled(false);
         mListener.onSelectMovie(movie);
     }
 
@@ -121,7 +137,7 @@ public class ListMoviesFragment extends Fragment
 
     }
 
-    private void getMovies(){
+    private void getMovies() {
         if (getContext() != null) {
             RequestQueue requestQueue = Volley.newRequestQueue(getContext());
             String url = Movie.URL;
@@ -144,6 +160,12 @@ public class ListMoviesFragment extends Fragment
                     }
 
                     ArrayList<String> genres = MovieUtils.getGenres(mMovies);
+                    Collections.sort(mMovies, new Comparator<Movie>() {
+                        @Override
+                        public int compare(Movie o1, Movie o2) {
+                            return o1.getLocalized_name().compareTo(o2.getLocalized_name());
+                        }
+                    });
                     mProgressBarGenres.setVisibility(View.GONE);
                     mRecyclerViewGenres.setVisibility(View.VISIBLE);
 

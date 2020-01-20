@@ -1,0 +1,52 @@
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background_text_genres"
+    android:layout_margin="4dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:weightSum="100">
+
+    <ImageView
+        android:id="@+id/fragment_movie_inf_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="40" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="60">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_movie_inf_name_text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_movie_inf_year_text"
+                style="@style/HeaderTextView" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_movie_inf_rating_text"
+                style="@style/HeaderTextView" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_marginTop="4dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_movie_inf_description_text"
+                android:textColor="@android:color/black"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>
