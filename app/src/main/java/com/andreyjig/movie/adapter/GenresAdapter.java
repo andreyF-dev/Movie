@@ -22,10 +22,17 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresHold
     private int selectedGenres;
     private GenresAdapterCallback mAdapterCallback;
 
-    public GenresAdapter(Context context, ArrayList<String> genres, GenresAdapterCallback adapterCallback) {
+    public GenresAdapter(Context context,
+                         ArrayList<String> genres,
+                         GenresAdapterCallback adapterCallback,
+                         String genre) {
         mContext = context;
         mGenres = genres;
-        selectedGenres = -1;
+        if (genre.isEmpty()) {
+            selectedGenres = -1;
+        } else {
+            selectedGenres = genres.indexOf(genre);
+        }
         mAdapterCallback = adapterCallback;
     }
 

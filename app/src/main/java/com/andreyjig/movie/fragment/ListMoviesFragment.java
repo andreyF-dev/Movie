@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,14 +37,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class ListMoviesFragment extends Fragment
         implements GenresAdapter.GenresAdapterCallback, FilmsAdapter.FilmsAdapterCallback {
 
-    private static final String TAG = "ListMoviesFragment";
+    private static final String KEY_MOVIES = "ListMovies";
+    private static final String KEY_GENRE = "CurrentGenre";
+
     private OnFragmentInteractionListener mListener;
     private View.OnClickListener mSnackBarOnClickListener;
 
@@ -56,6 +58,7 @@ public class ListMoviesFragment extends Fragment
     private FilmsAdapter mFilmsAdapter;
 
     private ArrayList<Movie> mMovies;
+    private String mGenre = new String();
 
     public ListMoviesFragment() {
 
@@ -69,7 +72,11 @@ public class ListMoviesFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        //setRetainInstance(true);
+        if (savedInstanceState != null){
+            mMovies = savedInstanceState.getParcelableArrayList(KEY_MOVIES);
+            mGenre = savedInstanceState.getString(KEY_GENRE);
+        }
     }
 
     @Override
@@ -81,20 +88,22 @@ public class ListMoviesFragment extends Fragment
         mProgressBarGenres = view.findViewById(R.id.fragment_list_movies_progress_bar_genres);
         mProgressBarFilms = view.findViewById(R.id.fragment_list_movies_progress_bar_films);
 
-        mProgressBarGenres.setVisibility(View.VISIBLE);
-        mProgressBarFilms.setVisibility(View.VISIBLE);
-        mRecyclerViewGenres.setVisibility(View.GONE);
-        mRecyclerViewFilms.setVisibility(View.GONE);
-
         mRecyclerViewFilms.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        mMovies = new ArrayList<>();
+
         mSnackBarOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getMovies();
             }
         };
-        getMovies();
+
+        if (mMovies == null ) {
+            mMovies = new ArrayList<>();
+            getMovies();
+        } else {
+
+            setAdapter();
+        }
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mRecyclerViewGenres.setLayoutManager(new GridLayoutManager(getContext(), 1));
@@ -116,6 +125,13 @@ public class ListMoviesFragment extends Fragment
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(KEY_MOVIES, mMovies);
+        outState.putString(KEY_GENRE, mGenre);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -124,6 +140,7 @@ public class ListMoviesFragment extends Fragment
     @Override
     public void setGenre(String genre) {
         mFilmsAdapter.getFilterMovies(genre);
+        mGenre = genre;
     }
 
     @Override
@@ -139,6 +156,11 @@ public class ListMoviesFragment extends Fragment
 
     private void getMovies() {
         if (getContext() != null) {
+            mProgressBarGenres.setVisibility(View.VISIBLE);
+            mProgressBarFilms.setVisibility(View.VISIBLE);
+            mRecyclerViewGenres.setVisibility(View.GONE);
+            mRecyclerViewFilms.setVisibility(View.GONE);
+
             RequestQueue requestQueue = Volley.newRequestQueue(getContext());
             String url = Movie.URL;
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
@@ -155,35 +177,18 @@ public class ListMoviesFragment extends Fragment
 
                     } catch (JSONException e) {
                         if (BuildConfig.DEBUG) {
-                            Log.d(TAG, "JSONException " + e);
+                            Log.d(KEY_MOVIES, "JSONException " + e);
                         }
                     }
 
-                    ArrayList<String> genres = MovieUtils.getGenres(mMovies);
-                    Collections.sort(mMovies, new Comparator<Movie>() {
-                        @Override
-                        public int compare(Movie o1, Movie o2) {
-                            return o1.getLocalized_name().compareTo(o2.getLocalized_name());
-                        }
-                    });
-                    mProgressBarGenres.setVisibility(View.GONE);
-                    mRecyclerViewGenres.setVisibility(View.VISIBLE);
-
-                    mGenresAdapter = new GenresAdapter(getContext(), genres, ListMoviesFragment.this);
-                    mRecyclerViewGenres.setAdapter(mGenresAdapter);
-
-                    mProgressBarFilms.setVisibility(View.GONE);
-                    mRecyclerViewFilms.setVisibility(View.VISIBLE);
-
-                    mFilmsAdapter = new FilmsAdapter(getContext(), mMovies, ListMoviesFragment.this);
-                    mRecyclerViewFilms.setAdapter(mFilmsAdapter);
+                    setAdapter();
                 }
 
 
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, "Error " + error);
+                    Log.d(KEY_MOVIES, "Error " + error);
                     error.printStackTrace();
                     Snackbar.make(mRecyclerViewFilms, getString(R.string.error_download), Snackbar.LENGTH_INDEFINITE)
                             .setAction(R.string.download_now, mSnackBarOnClickListener)
@@ -192,5 +197,27 @@ public class ListMoviesFragment extends Fragment
             });
             requestQueue.add(request);
         }
+    }
+
+    private void setAdapter(){
+        ArrayList<String> genres = MovieUtils.getGenres(mMovies);
+        Collections.sort(mMovies, new Comparator<Movie>() {
+            @Override
+            public int compare(Movie o1, Movie o2) {
+                return o1.getLocalized_name().compareTo(o2.getLocalized_name());
+            }
+        });
+        mProgressBarGenres.setVisibility(View.GONE);
+        mRecyclerViewGenres.setVisibility(View.VISIBLE);
+
+        mGenresAdapter = new GenresAdapter(getContext(), genres, ListMoviesFragment.this, mGenre);
+        mRecyclerViewGenres.setAdapter(mGenresAdapter);
+
+        mProgressBarFilms.setVisibility(View.GONE);
+        mRecyclerViewFilms.setVisibility(View.VISIBLE);
+
+        mFilmsAdapter = new FilmsAdapter(getContext(), mMovies, ListMoviesFragment.this);
+        mRecyclerViewFilms.setAdapter(mFilmsAdapter);
+        setGenre(mGenre);
     }
 }

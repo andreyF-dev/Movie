@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements ListMoviesFragmen
     public void onSelectMovie(Movie movie) {
         MovieInfFragment movieInfFragment = MovieInfFragment.newInstance(movie);
         ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.main_activity_container, movieInfFragment);
+        ft.replace(R.id.main_activity_container, movieInfFragment);
         ft.addToBackStack(null);
         ft.commit();
     }
