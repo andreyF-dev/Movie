@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,8 +42,7 @@ import java.util.Comparator;
 public class ListMoviesFragment extends Fragment
         implements GenresAdapter.GenresAdapterCallback, FilmsAdapter.FilmsAdapterCallback {
 
-    private static final String KEY_MOVIES = "ListMovies";
-    private static final String KEY_GENRE = "CurrentGenre";
+    private static final String TAG_LIST_MOVIES_FRAGMENT = "ListMovies";
 
     private OnFragmentInteractionListener mListener;
     private View.OnClickListener mSnackBarOnClickListener;
@@ -54,11 +52,10 @@ public class ListMoviesFragment extends Fragment
     private ProgressBar mProgressBarGenres;
     private ProgressBar mProgressBarFilms;
 
-    private GenresAdapter mGenresAdapter;
     private FilmsAdapter mFilmsAdapter;
 
     private ArrayList<Movie> mMovies;
-    private String mGenre = new String();
+    private String mGenre = "";
 
     public ListMoviesFragment() {
 
@@ -72,11 +69,7 @@ public class ListMoviesFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
-        if (savedInstanceState != null){
-            mMovies = savedInstanceState.getParcelableArrayList(KEY_MOVIES);
-            mGenre = savedInstanceState.getString(KEY_GENRE);
-        }
+        setRetainInstance(true);
     }
 
     @Override
@@ -101,7 +94,6 @@ public class ListMoviesFragment extends Fragment
             mMovies = new ArrayList<>();
             getMovies();
         } else {
-
             setAdapter();
         }
 
@@ -125,13 +117,6 @@ public class ListMoviesFragment extends Fragment
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(KEY_MOVIES, mMovies);
-        outState.putString(KEY_GENRE, mGenre);
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -149,54 +134,52 @@ public class ListMoviesFragment extends Fragment
     }
 
     public interface OnFragmentInteractionListener {
-
         void onSelectMovie(Movie movie);
-
     }
 
     private void getMovies() {
-        if (getContext() != null) {
-            mProgressBarGenres.setVisibility(View.VISIBLE);
-            mProgressBarFilms.setVisibility(View.VISIBLE);
-            mRecyclerViewGenres.setVisibility(View.GONE);
-            mRecyclerViewFilms.setVisibility(View.GONE);
+        mProgressBarGenres.setVisibility(View.VISIBLE);
+        mProgressBarFilms.setVisibility(View.VISIBLE);
+        mRecyclerViewGenres.setVisibility(View.GONE);
+        mRecyclerViewFilms.setVisibility(View.GONE);
 
-            RequestQueue requestQueue = Volley.newRequestQueue(getContext());
-            String url = Movie.URL;
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
-                    url, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                        Gson gson = new GsonBuilder().create();
-                        JSONArray array = response.getJSONArray(Movie.FILMS);
+        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+        String url = Movie.URL;
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
+                url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Gson gson = new GsonBuilder().create();
+                    JSONArray array = response.getJSONArray(Movie.FILMS);
 
-                        mMovies = gson.fromJson(array.toString(),
-                                new TypeToken<ArrayList<Movie>>() {
-                                }.getType());
+                    mMovies = gson.fromJson(array.toString(),
+                            new TypeToken<ArrayList<Movie>>() {
+                            }.getType());
 
-                    } catch (JSONException e) {
-                        if (BuildConfig.DEBUG) {
-                            Log.d(KEY_MOVIES, "JSONException " + e);
-                        }
+                } catch (JSONException e) {
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG_LIST_MOVIES_FRAGMENT, "JSONException " + e);
                     }
+                }
 
+                if (getContext() != null) {
                     setAdapter();
                 }
+            }
 
 
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d(KEY_MOVIES, "Error " + error);
-                    error.printStackTrace();
-                    Snackbar.make(mRecyclerViewFilms, getString(R.string.error_download), Snackbar.LENGTH_INDEFINITE)
-                            .setAction(R.string.download_now, mSnackBarOnClickListener)
-                            .show();
-                }
-            });
-            requestQueue.add(request);
-        }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG_LIST_MOVIES_FRAGMENT, "Error " + error);
+                error.printStackTrace();
+                Snackbar.make(mRecyclerViewFilms, getString(R.string.error_download), Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.download_now, mSnackBarOnClickListener)
+                        .show();
+            }
+        });
+        requestQueue.add(request);
     }
 
     private void setAdapter(){
@@ -210,8 +193,8 @@ public class ListMoviesFragment extends Fragment
         mProgressBarGenres.setVisibility(View.GONE);
         mRecyclerViewGenres.setVisibility(View.VISIBLE);
 
-        mGenresAdapter = new GenresAdapter(getContext(), genres, ListMoviesFragment.this, mGenre);
-        mRecyclerViewGenres.setAdapter(mGenresAdapter);
+        GenresAdapter genresAdapter = new GenresAdapter(getContext(), genres, ListMoviesFragment.this, mGenre);
+        mRecyclerViewGenres.setAdapter(genresAdapter);
 
         mProgressBarFilms.setVisibility(View.GONE);
         mRecyclerViewFilms.setVisibility(View.VISIBLE);
